@@ -1,0 +1,13 @@
+{
+  "name": "Student Performance Tracker",
+  "short_name": "Marks Board",
+  "description": "Three-role marks management: teachers record scores, students track rank and trends, admins view institution analytics.",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/favicon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/favicon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "theme_color": "#4a3826",
+  "background_color": "#a58a6b",
+  "display": "standalone"
+}
