@@ -1,6 +1,5 @@
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
-import { INSTITUTION_NAME } from '../lib/constants.js'
 
 const NAV = {
   admin: [
@@ -43,9 +42,11 @@ export default function BoardShell() {
               Student Performance Tracker
             </h1>
           </Link>
-          <span className="text-[13px] font-medium capitalize text-wood-text">{user?.role}</span>
-          <span className="ml-auto text-[13px] text-wood-text">
-            {user?.name} · {INSTITUTION_NAME}
+          <span className="ml-auto flex items-center gap-2.5">
+            <span className="rounded-sm bg-paper px-2 py-0.5 font-display text-[11px] font-semibold uppercase tracking-[0.16em] text-wood">
+              {user?.role}
+            </span>
+            <span className="text-[13px] text-wood-text">{user?.name}</span>
           </span>
           <button
             onClick={() => { logout(); navigate('/login') }}
