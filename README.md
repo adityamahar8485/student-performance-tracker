@@ -1,14 +1,34 @@
-# Student Performance Tracker & Analytics Dashboard
+# Student Performance Tracker
 
-A three-role (Admin / Teacher / Student) marks and performance management system — teachers record scores, students track their own progress and rank, and admins get an institution-wide analytics view. **All analytics and ranking are computed server-side with MongoDB aggregation pipelines** (`$group`, `$avg`, `$sort`, `$lookup`, `$project`, `$setWindowFields`, `$rank`) — never with JavaScript loops, and never by sorting fetched data in the frontend.
-
-Built for the Data Tech Alpha full-stack internship assignment (#3).
-
-## Screenshots
-
-**Admin — the board**: analytics notices (needs-attention pinned red), the pending lock request, top performers, institution trend sheet, and the pass/fail register.
+Teachers record marks. Students watch their grade, rank and trend move. Admins see the whole institution — **every number computed server-side with MongoDB aggregation pipelines**, never JS loops, never sorted in the browser.
 
 ![Admin board](docs/screenshots/admin-board.png)
+
+## Run the demo
+
+```bash
+# 1 — backend (needs a MongoDB Atlas MONGO_URI in server/.env, see .env.example)
+cd server && npm install
+npm run seed:demo        # 6 subjects · 3 teachers · 24 students · 18 exams · 320 marks
+npm run dev              # API → http://localhost:5000
+
+# 2 — frontend
+cd ../client && npm install
+echo "VITE_API_URL=http://localhost:5000" > .env
+npm run dev              # app → http://localhost:5173
+```
+
+**Sign in with any account** — passwords are shared per role:
+
+| Role | Any account | Password |
+|---|---|---|
+| Admin | `adityamahar8485@gmail.com` | `Admin@2026` |
+| Teacher | `priya.nair@school.dev` · `rahul.menon@school.dev` · `sneha.kulkarni@school.dev` | `Teacher@2026` |
+| Student | `firstname.lastname@student.dev` — 24 seeded, e.g. `naina.kapoor@student.dev` (topper), `aarav.sharma@student.dev` | `Student@2026` |
+
+The seed is deterministic and includes locked exams, one **pending lock request** on the admin board, unmarked finals (empty states), and a realistic pass/fail spread — every screen has something to show.
+
+## The three roles
 
 | Teacher — marks entry | Student — score trend |
 |---|---|
@@ -18,177 +38,134 @@ Built for the Data Tech Alpha full-stack internship assignment (#3).
 |---|---|
 | ![Student performance](docs/screenshots/student-performance.png) | ![Admin on mobile](docs/screenshots/admin-mobile.png) |
 
-More: [data tables on mobile](docs/screenshots/tables-mobile.png)
+## Architecture
 
-## Tech stack
+```mermaid
+flowchart LR
+    subgraph Vercel
+        RE[React + Vite<br/>Tailwind v4 · Recharts · Router v6]
+    end
+    subgraph Render
+        EX[Express] --> MW[JWT + role middleware] --> CT[controllers]
+        CT --> SV[services<br/>aggregation pipelines]
+    end
+    SV --> DB[(MongoDB Atlas<br/>Mongoose)]
+    RE -- "axios · Bearer token" --> EX
+```
 
-| Layer | Choice |
+```
+client/src/pages/{admin,teacher,student}/   # role dashboards on one board UI
+server/src/
+  models/        User · Subject · Enrollment · Exam · Mark
+  middleware/    protect + authorize (role gates) · security · errors
+  controllers/   request handling, ownership + lock guards
+  services/      ALL analytics & ranking — aggregation pipelines only
+  routes/        auth · admin · teacher · student
+```
+
+**Every analytics number comes from a pipeline in `services/`** — a quarter of the assignment grade, shown here in the actual shipped code:
+
+**Average per subject** — cumulative Σscore/ΣmaxMarks via `$group`, not a mean of ratios (`analyticsService.js`):
+
+```js
+Mark.aggregate([
+  { $lookup: { from: 'exams', localField: 'exam', foreignField: '_id', as: 'examDoc' } },
+  { $unwind: '$examDoc' },
+  { $group: { _id: '$examDoc.subject', totalScore: { $sum: '$score' }, totalMax: { $sum: '$examDoc.maxMarks' } } },
+  { $project: { avgPercentage: { $round: [{ $multiply: [{ $divide: ['$totalScore', '$totalMax'] }, 100] }, 2] } } },
+  // …$lookup subject names, $sort desc
+])
+```
+
+**Pass/fail per subject** — the 40% rule recomputed in-pipeline with `$cond`:
+
+```js
+passCount: { $sum: { $cond: [{ $gte: ['$score', { $multiply: ['$examDoc.maxMarks', 0.4] }] }, 1, 0] } }
+```
+
+**Student rank** — `$setWindowFields` + `$rank` over the batch cohort (`rankService.js`); the spec repeats four times that rank must never be computed in the frontend:
+
+```js
+{ $setWindowFields: { sortBy: { cumulativePercentage: -1 }, output: { rank: { $rank: {} } } } },
+{ $facet: { me: [{ $match: { _id: oid } }], cohort: [{ $count: 'size' }] } }
+```
+
+**Top 3 performers** (`$group` → `$sort` → `$limit` → `$lookup` users), **lowest-average subject** (the "needs attention" pin), and **institution trend per exam** follow the same pattern.
+
+### The exam lock — the most-missed feature, designed into the schema
+
+```
+teacher: PATCH /exams/:id/request-lock   →  lockRequested: true
+admin:   PATCH /exams/:id/lock           →  isLocked: true, lockedAt
+teacher: any marks write                 →  403 "locked — marks cannot be edited"
+```
+
+Two flags from day one: a request never blocks edits; only the admin's lock does. Locked exams still count in analytics — they're final.
+
+### Data model
+
+| Collection | Key fields |
 |---|---|
-| Frontend | React 19 (Vite) · React Router v6 · Tailwind CSS v4 · Recharts · axios |
-| Backend | Node.js + Express.js |
-| Database | MongoDB Atlas (free M0) via Mongoose |
-| Auth | JWT (Bearer) + bcrypt (12 rounds) + role middleware |
-| Deploy | Backend → Render (free) · Frontend → Vercel (free) |
+| `User` | role `admin·teacher·student`, `passwordHash` (bcrypt-12), `batch` (rank cohort) |
+| `Subject` | name, unique `code`, `totalMarks`, assigned `teacher` |
+| `Enrollment` | `student` + `subject` — compound **unique** index (clean `$lookup`s) |
+| `Exam` | `maxMarks`, `lockRequested`, `isLocked`, `lockedAt` |
+| `Mark` | `exam` + `student` — compound **unique** index (bulk upserts), pre-save grade hook |
 
-## Demo accounts
-
-After running the demo seed (below):
-
-| Role | Email | Password |
-|---|---|---|
-| Admin | `adityamahar8485@gmail.com` | `Admin@2026` |
-| Teacher | `priya.nair@school.dev` (also rahul.menon / sneha.kulkarni) | `Teacher@2026` |
-| Student | `aarav.sharma@student.dev` (24 seeded students) | `Student@2026` |
-
-The dataset includes **6 subjects, 3 teachers, 24 students across two batches (2025/2026), 18 exams** (including locked exams and one pending lock request) **and 320 marks** with a realistic score spread — enough for every analytics view, rank, chart, and empty/locked state to be demoed.
-
-All passwords are bcrypt-hashed before they are stored (the `User` model's pre-save hook); the database never holds plaintext passwords.
-
-## Setup
-
-### 1. Prerequisites
-
-- Node.js ≥ 20
-- A free MongoDB Atlas M0 cluster ([create one here](https://cloud.mongodb.com)):
-  - **Database user** (Atlas → Security → Database Users) with read/write role
-  - **Network access**: `0.0.0.0/0` (required for Render — its egress IPs rotate)
-
-### 2. Backend (`/server`)
-
-```bash
-cd server
-npm install
-cp .env.example .env     # then fill in the values (see table below)
-npm run seed:demo        # admin + full demo dataset (or: npm run seed for admin only)
-npm run dev              # API on http://localhost:5000
-```
-
-**Environment variables** (`server/.env`):
-
-| Variable | What it is |
-|---|---|
-| `PORT` | API port (default 5000; Render injects its own) |
-| `NODE_ENV` | `development` locally, `production` on Render |
-| `MONGO_URI` | Atlas connection string (see note below) |
-| `JWT_SECRET` | Random hex — `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
-| `JWT_EXPIRES_IN` | Token lifetime (default `7d`) |
-| `ADMIN_NAME` / `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Admin seeder values (password is bcrypt-hashed on save; production refuses to seed without an explicit `ADMIN_PASSWORD`) |
-| `CLIENT_URL` | Frontend origin for CORS (comma-separate multiple) |
-
-> **`MONGO_URI` note:** use the standard SRV string from Atlas (`mongodb+srv://user:pass@host/db?retryWrites=true&w=majority`). Our dev machine's DNS blocks Node's SRV lookups, so the committed *example* also documents a host-list equivalent — on Atlas → Connect → Drivers both forms are shown.
-
-### 3. Frontend (`/client`)
-
-```bash
-cd client
-npm install
-cp .env.example .env     # VITE_API_URL=http://localhost:5000
-npm run dev              # app on http://localhost:5173
-```
-
-### 4. Tests
-
-With the API running on port 5000:
-
-```bash
-cd server
-# full end-to-end suite (wipes the DB, seeds fixtures, 50 assertions)
-node tests/wipe.mjs && npm run seed && python tests/e2e.py
-
-# demo-data verification (13 assertions over the seeded dataset)
-npm run seed:demo && python tests/verify-demo.py
-node tests/verify-hash.mjs   # proves the admin password is stored bcrypt-hashed
-```
-
-The E2E suite walks the entire graded flow with hand-computed expected values: role setup → exam creation → bulk marks → corrections → lock request → admin lock → locked-edit rejection → analytics numbers → student rank/trend → access control.
-
-> **Before demoing:** the E2E suite replaces the demo dataset with its own fixtures — re-run `npm run seed:demo` to restore the demo accounts. Note the login rate limit (20 attempts / 15 min per visitor) applies while testing many accounts quickly.
+Grades are computed server-side: **A ≥90 · B 75–89 · C 60–74 · D 40–59 · F <40 · pass = 40% of exam max.**
 
 ## API reference
 
-All responses are JSON `{ "success": true, "data": … }` or `{ "success": false, "message": … }`. Authenticated routes take `Authorization: Bearer <token>`. Role middleware: every `/api/admin|teacher|student` route is gated to its role.
+JSON everywhere: `{ success, data }` / `{ success, message }`; authenticated routes take `Authorization: Bearer <token>`; every `/api/admin|teacher|student` route is role-gated.
 
-### Auth
-| Method & path | Body → Response |
+| Endpoint | Body → Response |
 |---|---|
-| `POST /api/auth/login` | `{ email, password }` → `{ token, user: { id, name, email, role, batch } }` |
-
-### Admin
-| Method & path | Body → Response |
-|---|---|
+| `POST /api/auth/login` | `{ email, password }` → `{ token, user }` |
 | `POST /api/admin/subjects` | `{ name, code, totalMarks }` → subject |
-| `GET /api/admin/subjects` | → subjects with `teacher` + `studentCount` |
+| `GET /api/admin/subjects` | → subjects + teacher + student count |
 | `POST /api/admin/teachers` | `{ name, email, password, subject }` → teacher + assignment |
-| `GET /api/admin/teachers` | → teachers with held subjects |
-| `POST /api/admin/students` | `{ name, email, password, batch, subjects: [id] }` → student + enrollments |
-| `GET /api/admin/students` | → students with enrolled subjects |
-| `GET /api/admin/exams` | → all exams with subject, teacher, lock flags |
-| `PATCH /api/admin/exams/:id/lock` | `{ isLocked: true|false }` → updated lock state (**the only path that locks**) |
-| `GET /api/admin/analytics` | → `{ avgPerSubject, passFailPerSubject, topPerformers, lowestAvgSubject, examTrend, totals }` — all computed by aggregation pipelines in `services/analyticsService.js` |
+| `GET /api/admin/teachers` | → teachers + held subjects |
+| `POST /api/admin/students` | `{ name, email, password, batch, subjects[] }` → student + enrollments |
+| `GET /api/admin/students` | → students + enrolled subjects |
+| `GET /api/admin/exams` | → exams + lock flags |
+| `PATCH /api/admin/exams/:id/lock` | `{ isLocked }` → lock state (**only path that locks**) |
+| `GET /api/admin/analytics` | → averages, pass/fail, top 3, lowest subject, exam trend, totals |
+| `GET /api/teacher/subjects` | → own subjects + enrolled counts |
+| `POST /api/teacher/exams` | `{ subject, name, date, maxMarks }` → exam (own subjects only) |
+| `POST /api/teacher/exams/:id/marks` | `{ marks: [{ student, score }] }` → bulk upsert (guards: enrollment, max, lock) |
+| `PATCH /api/teacher/marks/:id` | `{ score }` → corrected entry (403 when locked) |
+| `GET /api/teacher/exams/:id/results` | → marks table incl. unmarked students |
+| `PATCH /api/teacher/exams/:id/request-lock` | → `lockRequested` |
+| `GET /api/student/subjects` | → subject cards (totals, %, grade) |
+| `GET /api/student/performance` | → cumulative %, grade, **batch rank**, breakdown |
+| `GET /api/student/subjects/:id/trend` | → chronological trend (Recharts data) |
 
-### Teacher (own subjects only — enforced on every route)
-| Method & path | Body → Response |
+## Spec ambiguities — decided and documented
+
+| Open point | Choice |
 |---|---|
-| `GET /api/teacher/subjects` | → assigned subjects + enrolled count |
-| `POST /api/teacher/exams` | `{ subject, name, date, maxMarks }` → exam |
-| `GET /api/teacher/exams` | → own exams with lock status |
-| `POST /api/teacher/exams/:id/marks` | `{ marks: [{ student, score }] }` → bulk upsert (rejects unenrolled students, scores > max, locked exams) |
-| `PATCH /api/teacher/marks/:id` | `{ score }` → corrected entry (403 when the exam is locked; %, grade, pass recomputed) |
-| `GET /api/teacher/exams/:id/results` | → marks table incl. enrolled-but-unmarked students |
-| `PATCH /api/teacher/exams/:id/request-lock` | → flags the exam for admin review |
+| "Register and login for all three roles" vs login-only endpoint list | Admin seeds itself; admin registers teachers/students — no public registration |
+| "Rank within their enrolled batch" (undefined) | Ranked within `User.batch` via the `$rank` pipeline |
+| Pass/fail per subject | Counted per mark entry, threshold recomputed in-pipeline |
+| "Average score per subject" | Cumulative Σ/Σ, not mean of percentages |
+| Lock semantics | Only admin's `isLocked` blocks edits; requests are advisory |
 
-### Student (own data only)
-| Method & path | Response |
-|---|---|
-| `GET /api/student/subjects` | enrolled subjects with totals, %, grade per subject |
-| `GET /api/student/performance` | cumulative %, overall grade, **batch rank (aggregation `$setWindowFields` + `$rank`)**, cohort size, grade breakdown |
-| `GET /api/student/subjects/:id/trend` | chronological score trend for one subject (Recharts data) |
+## Deploy
 
-### Grading (computed server-side)
+**Backend → Render**: root `server`, `npm install` / `npm start`, env `MONGO_URI` (SRV string) · `JWT_SECRET` · `CLIENT_URL` (Vercel URL) · `NODE_ENV=production` · `ADMIN_PASSWORD` (required in prod). Health: `/api/health`; `trust proxy` is set so rate limits key per visitor; free tier sleeps ~30–60s on first hit.
 
-| Percentage | Grade | | Pass rule |
-|---|---|---|---|
-| ≥ 90 | A | | pass = score ≥ **40% of the exam's max marks** |
-| 75–89 | B | 40–59 | D |
-| 60–74 | C | < 40 | F |
+**Frontend → Vercel**: root `client` (Vite auto-detected), env `VITE_API_URL` = Render URL; `vercel.json` ships the SPA rewrite for deep links.
 
-## Documented design decisions (spec ambiguities)
+## Tests
 
-The assignment leaves a few points open; these are the choices made, visible in code and tests:
-
-1. **Registration model** — the endpoint list contains only `POST /api/auth/login`. Teachers and students are *registered by the admin* (assignment + enrollment in the same call); the admin itself is created by the seeder, never by a public route.
-2. **"Rank within their enrolled batch"** — interpreted as the student's cohort (`User.batch`, set at registration). Rank is computed by a `$setWindowFields` + `$rank` pipeline against every marked student in the same batch. Students without marks are unranked but counted rules-wise as outside the cohort.
-3. **Pass/fail per subject** — counted **per mark entry** against the 40%-of-exam-max rule, recomputed inside the pipeline from raw values (not cached flags).
-4. **"Average score per subject"** — cumulative percentage (Σscore / ΣmaxMarks), not the mean of per-exam percentages (they differ when exams carry different max marks).
-5. **Lock flow** — two flags: `lockRequested` (teacher asks) → `isLocked` (admin decides, via `PATCH /api/admin/exams/:id/lock`). Only `isLocked` blocks edits; a request alone does not.
-
-## Deployment
-
-### Backend → Render (free)
-
-1. New Web Service → connect the repo → **Root directory** `server`
-2. Build command `npm install` · Start command `npm start` (honors Render's `PORT`)
-3. Environment variables: `MONGO_URI` (the **SRV** string), `JWT_SECRET`, `CLIENT_URL` = your Vercel URL, `NODE_ENV=production`, `ADMIN_PASSWORD` (required in production — the seeder refuses a default)
-4. Health check path: `/api/health`. The app sets `trust proxy` for Render's edge, so rate limits key per visitor. Note: free-tier services sleep — the first request after idle takes ~30–60 s.
-
-### Frontend → Vercel (free)
-
-1. New project → import repo → **Root directory** `client` (framework auto-detected: Vite)
-2. Environment variable: `VITE_API_URL` = the Render URL (baked at build time — set it before deploying)
-3. `client/vercel.json` already ships the SPA rewrite so React Router deep links work.
-
-## Repository layout
-
-```
-├── client/            # React (Vite) — Tailwind v4, React Router, Recharts
-│   └── src/pages/     # admin / teacher / student dashboards
-├── server/            # Express + Mongoose
-│   └── src/
-│       ├── models/     # User, Subject, Enrollment, Exam (lock flags), Mark (unique index + grade hook)
-│       ├── services/   # ALL aggregation pipelines (analytics, rank, student summaries)
-│       ├── controllers/, routes/, middleware/ (JWT protect + role gates)
-│       └── seed.js     # npm run seed | npm run seed:demo
-└── docs/screenshots/
+```bash
+node tests/wipe.mjs && npm run seed && python tests/e2e.py   # 50 assertions — full graded flow, hand-computed expectations
+npm run seed:demo && python tests/verify-demo.py             # 13 assertions over the demo dataset
+node tests/verify-hash.mjs                                   # proof the admin password is stored bcrypt-hashed
 ```
 
-No credentials are committed: both `.env` files are git-ignored, and `.env.example` files carry placeholders only.
+The E2E suite walks the whole graded story: setup → exams → marks → corrections → lock request → admin lock → **locked-edit rejection** → exact analytics numbers → rank/trend → access control.
+
+---
+
+No credentials are committed — `.env` files are git-ignored; `.env.example` files carry placeholders only.
