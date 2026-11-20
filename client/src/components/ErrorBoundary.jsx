@@ -11,6 +11,11 @@ export default class ErrorBoundary extends Component {
     return { error }
   }
 
+  componentDidCatch(error, info) {
+    // Surface the full failure for diagnosis (console + optional remote log)
+    console.error('[ErrorBoundary]', error, info?.componentStack)
+  }
+
   render() {
     if (!this.state.error) return this.props.children
     return (

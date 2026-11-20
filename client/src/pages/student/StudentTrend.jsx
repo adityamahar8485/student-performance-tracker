@@ -68,8 +68,8 @@ export default function StudentTrend() {
       <div className="xl:col-span-8">
         {!chosen
           ? <EmptyNotice title="NO SUBJECT SELECTED" hint="Choose a subject to see your score trend." tilt={0.4} />
-          : trend.loading ? <LoadingNotice label="TREND SHEET" tilt={0.4} />
           : trend.error ? <ErrorNotice message={trend.error} onRetry={trend.reload} />
+          : trend.loading || !trend.data ? <LoadingNotice label="TREND SHEET" tilt={0.4} />
           : (
             <Notice pin="green" tilt={0.4} settleKey={`${chosen}-${data.map((p) => p.percentage).join()}`}>
               <div className="cap mb-1">SCORE TREND · {trend.data.subject.name.toUpperCase()} · {trend.data.subject.code}</div>

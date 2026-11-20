@@ -99,8 +99,8 @@ export default function MarksEntry() {
       <div className="xl:col-span-8">
         {!examId
           ? <EmptyNotice title="NO EXAM SELECTED" hint="Pick an exam on the left; every enrolled student appears in its marks sheet." tilt={0.4} />
-          : results.loading ? <LoadingNotice label="MARKS SHEET" tilt={0.4} />
           : results.error ? <ErrorNotice message={results.error} onRetry={results.reload} />
+          : results.loading || !results.data ? <LoadingNotice label="MARKS SHEET" tilt={0.4} />
           : (
             <Notice pin={locked ? 'red' : 'green'} tilt={0.4}
               settleKey={`${examId}-${rows.map((r) => r.score).join()}`}>

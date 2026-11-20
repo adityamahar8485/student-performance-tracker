@@ -83,8 +83,8 @@ export default function ExamResults() {
       <div className="xl:col-span-8">
         {!examId
           ? <EmptyNotice title="NO EXAM SELECTED" hint="Pick an exam to see its full marks table." tilt={0.4} />
-          : results.loading ? <LoadingNotice label="RESULTS SHEET" tilt={0.4} />
           : results.error ? <ErrorNotice message={results.error} onRetry={results.reload} />
+          : results.loading || !results.data ? <LoadingNotice label="RESULTS SHEET" tilt={0.4} />
           : (
             <Notice pin={results.data.exam.isLocked ? 'red' : 'green'} tilt={0.4} settleKey={examId}>
               <div className="cap mb-1">RESULTS · {results.data.exam.name} · {fmtDate(results.data.exam.date)}</div>
