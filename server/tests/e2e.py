@@ -165,6 +165,8 @@ check("admin sees riya's profile (1 subject, MATH101, exam register with marks)"
       len(r["data"]["subjects"]) == 1 and r["data"]["subjects"][0]["subject"]["code"] == "MATH101"
       and len(r["data"]["exams"]) >= 1 and all(e["marksEntered"] > 0 for e in r["data"]["exams"]),
       r.get("data", r))
+check("teacher totals are scoped to their subjects (3 marks, not institution-wide)",
+      r["data"]["totals"]["marks"] == 3, r["data"]["totals"])
 s, r = call("GET", f"/admin/teachers/{T1_ID}/profile", None, T2)
 check("teacher blocked from admin teacher-profile route (403)", s == 403, r)
 

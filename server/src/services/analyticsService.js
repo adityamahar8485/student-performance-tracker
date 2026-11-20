@@ -222,7 +222,7 @@ export const buildTeacherProfile = async (teacherId) => {
   const subjects = await Subject.find({ teacher: teacherId }).lean();
   const subjectIds = subjects.map((s) => s._id);
 
-  const [enrolled, avgRows, passFailRows, exams, marksPerExam, marksTotal] =
+  const [enrolled, avgRows, passFailRows, exams, marksPerExam] =
     await Promise.all([
       subjectIds.length
         ? Enrollment.aggregate([
@@ -277,7 +277,6 @@ export const buildTeacherProfile = async (teacherId) => {
       Mark.aggregate([
         { $group: { _id: '$exam', marksEntered: { $sum: 1 } } },
       ]),
-      Mark.countDocuments(),
     ]);
 
   const enrolledMap = new Map(enrolled.map((e) => [String(e._id), e.studentCount]));
@@ -318,6 +317,12 @@ export const buildTeacherProfile = async (teacherId) => {
       lockRequested: e.lockRequested,
       marksEntered: marksMap.get(String(e._id)) ?? 0,
     })),
-    totals: { subjects: subjects.length, exams: exams.length, marks: marksTotal },
+    // Marks counted only within THIS teacher's subjects (Σ entries from the
+    // scoped pipelines) — never the institution-wide total
+    totals: {
+      subjects: subjects.length,
+      exams: exams.length,
+      marks: avgRows.reduce((sum, a) => sum + a.entries, 0),
+    },
   };
 };

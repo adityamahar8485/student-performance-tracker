@@ -70,7 +70,7 @@ export default function TeacherProfile() {
           settleKey={`pf-${totalPass}-${totalFail}`}
           label="PASS / FAIL · THEIR SUBJECTS"
           value={totalFail > 0 ? `${totalPass} / ${totalFail}` : String(totalPass)}
-          sub={`pass / fail across ${d.totals.marks} institution marks · pass at 40%`}
+          sub={`pass / fail across their ${d.totals.marks} marks · pass at 40%`}
         />
       </div>
 
