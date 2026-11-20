@@ -25,8 +25,8 @@ export default function Login() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
-      <div className="w-full max-w-sm">
+    <div className="flex min-h-dvh justify-center px-4 py-8">
+      <div className="my-auto w-full max-w-sm">
         <Notice pin="gold" tilt={-0.6}>
           <h1 className="font-display text-[26px] font-semibold leading-tight tracking-[0.04em]">
             Student Performance Tracker

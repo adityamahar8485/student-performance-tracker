@@ -14,8 +14,8 @@ export default class ErrorBoundary extends Component {
   render() {
     if (!this.state.error) return this.props.children
     return (
-      <div className="flex min-h-screen items-center justify-center px-4">
-        <div className="notice max-w-md p-5 pt-6" style={{ '--tilt': 0.4 }}>
+      <div className="flex min-h-dvh justify-center px-4 py-8">
+        <div className="notice my-auto max-w-md p-5 pt-6" style={{ '--tilt': 0.4 }}>
           <span className="pin bg-pin-red" aria-hidden="true" />
           <div className="mb-2 inline-block bg-pin-red px-2.5 py-1 font-display text-[11px] font-semibold tracking-[0.16em] text-paper">
             PIN FAILED
