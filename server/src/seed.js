@@ -118,10 +118,11 @@ const seedDemo = async () => {
     });
   }
 
-  // Students (batch 2025 slightly stronger — seniors)
+  // Students (batch 2025 slightly stronger — seniors; 2026 floor low enough
+  // that a few students genuinely fail exams, so pass/fail views carry data)
   const students = [];
   for (const [batch, names, lo, hi] of [
-    ['2026', BATCH_2026, 0.42, 0.88],
+    ['2026', BATCH_2026, 0.28, 0.88],
     ['2025', BATCH_2025, 0.5, 0.95],
   ]) {
     for (const name of names) {

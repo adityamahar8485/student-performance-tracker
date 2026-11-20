@@ -21,7 +21,7 @@ export default function StudentTrend() {
   const [subjectId, setSubjectId] = useState('')
   const [refresh, setRefresh] = useState(0)
 
-  const chosen = subjectId || (subjects.data ?? [])[0]?._id || ''
+  const chosen = subjectId || (subjects.data ?? [])[0]?.subject?._id || ''
   const fetchTrend = () => chosen
     ? api.get(`/api/student/subjects/${chosen}/trend`).then((r) => r.data.data)
     : Promise.resolve(null)
