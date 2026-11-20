@@ -68,9 +68,9 @@ export default function TeacherProfile() {
           pin={totalFail > 0 ? 'gold' : 'green'}
           tilt={-0.4}
           settleKey={`pf-${totalPass}-${totalFail}`}
-          label="PASS / FAIL · THEIR SUBJECTS"
+          label="PASS / FAIL ENTRIES · THEIR SUBJECTS"
           value={totalFail > 0 ? `${totalPass} / ${totalFail}` : String(totalPass)}
-          sub={`pass / fail across their ${d.totals.marks} marks · pass at 40%`}
+          sub={`${totalPass} passing · ${totalFail} failing of ${d.totals.marks} exam entries · pass at 40% of exam max`}
         />
       </div>
 
@@ -87,7 +87,7 @@ export default function TeacherProfile() {
             sub={`${s.subject.name} · ${s.studentCount} students · ${s.examCount} exams`}
           >
             <div className="num mt-3 flex justify-between border-t border-paper-rule pt-3 text-[13px]">
-              <span className="text-ink-soft">Pass / fail</span>
+              <span className="text-ink-soft">Pass / fail entries</span>
               <span>
                 <span className="font-semibold text-pin-green-text">{s.passCount}</span>
                 {' / '}

@@ -171,11 +171,11 @@ export default function AdminBoard() {
       {d && d.passFailPerSubject.length > 0 && (
         <div className="xl:col-span-12">
           <Notice pin="green" tilt={-0.3} settleKey={d.passFailPerSubject.map((p) => p.passCount + p.failCount).join()}>
-            <div className="cap mb-4">PASS / FAIL PER SUBJECT · PASS = 40% OF EXAM MAX</div>
+            <div className="cap mb-4">PASS / FAIL ENTRIES PER SUBJECT · PASS = 40% OF EXAM MAX</div>
           <div className="sheet-scroll">
             <table className="sheet-table">
               <thead>
-                <tr><th>SUBJECT</th><th>ENTRIES</th><th>PASS</th><th>FAIL</th></tr>
+                <tr><th>SUBJECT</th><th>ENTRIES</th><th>PASSING</th><th>FAILING</th></tr>
               </thead>
               <tbody>
                 {d.passFailPerSubject.map((row) => (
@@ -197,6 +197,9 @@ export default function AdminBoard() {
               </tfoot>
             </table>
           </div>
+          <p className="mt-3 text-[13px] text-ink-soft">
+            Entries are individual exam marks (one student × one exam), not students — a student can pass one exam and fail another.
+          </p>
           </Notice>
         </div>
       )}
