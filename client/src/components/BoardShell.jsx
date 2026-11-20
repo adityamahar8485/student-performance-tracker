@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 import { INSTITUTION_NAME } from '../lib/constants.js'
 
@@ -33,9 +33,16 @@ export default function BoardShell() {
     <div className="flex min-h-screen flex-col">
       <header className="border-b-[6px] border-wood-edge bg-wood px-6 py-4 md:px-10">
         <div className="flex flex-wrap items-baseline gap-x-5 gap-y-1">
-          <h1 className="font-display text-[26px] font-semibold tracking-[0.06em] text-paper">
-            Student Performance Tracker
-          </h1>
+          {/* The wordmark is the way home — each role lands on its own board */}
+          <Link
+            to={`/${user?.role ?? ''}`}
+            aria-label="Student Performance Tracker — back to your board"
+            className="no-underline"
+          >
+            <h1 className="font-display text-[26px] font-semibold tracking-[0.06em] text-paper transition-opacity hover:opacity-80">
+              Student Performance Tracker
+            </h1>
+          </Link>
           <span className="text-[13px] font-medium capitalize text-wood-text">{user?.role}</span>
           <span className="ml-auto text-[13px] text-wood-text">
             {user?.name} · {INSTITUTION_NAME}
