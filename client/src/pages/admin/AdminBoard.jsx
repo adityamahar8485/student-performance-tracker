@@ -7,6 +7,7 @@ import {
 import api from '../../lib/api.js'
 import useApi from '../../hooks/useApi.js'
 import Notice from '../../components/Notice.jsx'
+import SubjectCode from '../../components/SubjectCode.jsx'
 import StatNotice from '../../components/StatNotice.jsx'
 import { LoadingNotice, ErrorNotice, EmptyNotice } from '../../components/NoticeStates.jsx'
 
@@ -180,7 +181,7 @@ export default function AdminBoard() {
               <tbody>
                 {d.passFailPerSubject.map((row) => (
                   <tr key={row.subject.id}>
-                    <td className="font-semibold">{row.subject.name} · {row.subject.code}</td>
+                    <td className="font-semibold">{row.subject.name}<SubjectCode code={row.subject.code} /></td>
                     <td>{row.totalEntries}</td>
                     <td className="font-semibold text-pin-green-text">{row.passCount}</td>
                     <td className={row.failCount > 0 ? 'font-bold text-pin-red-text' : 'text-ink-soft'}>{row.failCount}</td>

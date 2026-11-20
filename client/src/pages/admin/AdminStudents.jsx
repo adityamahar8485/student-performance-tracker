@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import api from '../../lib/api.js'
 import useApi from '../../hooks/useApi.js'
 import Notice from '../../components/Notice.jsx'
+import SubjectCode from '../../components/SubjectCode.jsx'
 import Field from '../../components/Field.jsx'
 import { LoadingNotice, ErrorNotice, EmptyNotice } from '../../components/NoticeStates.jsx'
 
@@ -72,7 +73,7 @@ export default function AdminStudents() {
                       checked={form.subjects.includes(s._id)}
                       onChange={() => toggleSubject(s._id)}
                     />
-                    <span className="text-sm">{s.name} · {s.code}</span>
+                    <span className="text-sm">{s.name}<SubjectCode code={s.code} /></span>
                   </label>
                 ))}
                 {!subjects.loading && (subjects.data ?? []).length === 0 && (

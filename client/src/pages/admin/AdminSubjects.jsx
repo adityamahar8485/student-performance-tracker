@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import api from '../../lib/api.js'
 import useApi from '../../hooks/useApi.js'
 import Notice from '../../components/Notice.jsx'
+import SubjectCode from '../../components/SubjectCode.jsx'
 import Field from '../../components/Field.jsx'
 import { LoadingNotice, ErrorNotice, EmptyNotice } from '../../components/NoticeStates.jsx'
 
@@ -69,7 +70,7 @@ export default function AdminSubjects() {
                 <tbody>
                   {list.data.map((s) => (
                     <tr key={s._id}>
-                      <td className="font-semibold">{s.name} · {s.code}</td>
+                      <td className="font-semibold">{s.name}<SubjectCode code={s.code} /></td>
                       <td>{s.totalMarks}</td>
                       <td className="text-left">{s.teacher ? s.teacher.name : <span className="text-ink-soft">unassigned</span>}</td>
                       <td>{s.studentCount}</td>

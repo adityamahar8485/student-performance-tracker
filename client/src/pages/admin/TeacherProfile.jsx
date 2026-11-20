@@ -2,6 +2,7 @@ import { useParams, Link } from 'react-router-dom'
 import api from '../../lib/api.js'
 import useApi from '../../hooks/useApi.js'
 import Notice from '../../components/Notice.jsx'
+import SubjectCode from '../../components/SubjectCode.jsx'
 import StatNotice from '../../components/StatNotice.jsx'
 import { LoadingNotice, ErrorNotice, EmptyNotice } from '../../components/NoticeStates.jsx'
 
@@ -112,7 +113,7 @@ export default function TeacherProfile() {
                   {d.exams.map((e) => (
                     <tr key={e.id}>
                       <td className="font-semibold">{e.name}</td>
-                      <td className="text-left">{e.subject ? `${e.subject.name} · ${e.subject.code}` : '—'}</td>
+                      <td className="text-left">{e.subject ? <>{e.subject.name}<SubjectCode code={e.subject.code} /></> : '—'}</td>
                       <td>{fmtDate(e.date)}</td>
                       <td>{e.maxMarks}</td>
                       <td className="font-bold">{e.marksEntered}</td>

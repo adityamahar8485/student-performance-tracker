@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import api from '../../lib/api.js'
 import useApi from '../../hooks/useApi.js'
 import Notice from '../../components/Notice.jsx'
+import SubjectCode from '../../components/SubjectCode.jsx'
 import StatNotice from '../../components/StatNotice.jsx'
 import GradeBadge from '../../components/GradeBadge.jsx'
 import { LoadingNotice, ErrorNotice, EmptyNotice } from '../../components/NoticeStates.jsx'
@@ -93,7 +94,7 @@ export default function StudentPerformance() {
                       <tbody>
                         {d.perSubject.map((p) => (
                           <tr key={p.subject._id}>
-                            <td className="font-semibold">{p.subject.name} · {p.subject.code}</td>
+                            <td className="font-semibold">{p.subject.name}<SubjectCode code={p.subject.code} /></td>
                             <td>{p.examCount}</td>
                             <td>{p.totalScore}</td>
                             <td>{p.totalMax}</td>

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import api from '../../lib/api.js'
 import useApi from '../../hooks/useApi.js'
 import Notice from '../../components/Notice.jsx'
+import SubjectCode from '../../components/SubjectCode.jsx'
 import { LoadingNotice, ErrorNotice, EmptyNotice } from '../../components/NoticeStates.jsx'
 
 const fetchExams = () => api.get('/api/admin/exams').then((r) => r.data.data)
@@ -50,7 +51,7 @@ export default function AdminExams() {
                   {list.data.map((e) => (
                     <tr key={e._id}>
                       <td className="font-semibold">{e.name}</td>
-                      <td className="text-left">{e.subject?.name} · {e.subject?.code}</td>
+                      <td className="text-left">{e.subject?.name}<SubjectCode code={e.subject?.code} /></td>
                       <td className="text-left">{e.subject?.teacher?.name ?? '-'}</td>
                       <td>{fmtDate(e.date)}</td>
                       <td>{e.maxMarks}</td>
