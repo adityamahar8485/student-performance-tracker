@@ -82,7 +82,7 @@ export default function AdminTeachers() {
               <div className="cap mb-4">STAFF RECORDS · {teachers.data.length}</div>
               <div className="sheet-scroll">
               <table className="sheet-table">
-                <thead><tr><th>TEACHER</th><th>SUBJECTS HELD</th></tr></thead>
+                <thead><tr><th>TEACHER</th><th>SUBJECTS HELD</th><th>RECORD</th></tr></thead>
                 <tbody>
                   {teachers.data.map((t) => (
                     <tr key={t._id}>
@@ -96,6 +96,7 @@ export default function AdminTeachers() {
                               </span>
                             ))}
                       </td>
+                      <td className="text-left"><Link className="tlink" to={`/admin/teachers/${t._id}`}>View →</Link></td>
                     </tr>
                   ))}
                 </tbody>

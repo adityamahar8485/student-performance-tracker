@@ -157,6 +157,17 @@ check("teacher blocked from non-shared student profile (403)", s == 403, r)
 s, r = call("GET", f"/teacher/students/{students['aarav@student.dev']}/performance", None, T1)
 check("teacher sees shared student's profile", s == 200 and r["data"]["student"]["name"] == "Aarav", r)
 
+# ---- 6c. Admin visibility of teacher profiles --------------------------------
+_, r = call("POST", "/auth/login", {"email": "riya@school.dev", "password": "Teacher@1"})
+T1_ID = r["user"]["id"]
+s, r = call("GET", f"/admin/teachers/{T1_ID}/profile", None, TA)
+check("admin sees riya's profile (1 subject, MATH101, exam register with marks)",
+      len(r["data"]["subjects"]) == 1 and r["data"]["subjects"][0]["subject"]["code"] == "MATH101"
+      and len(r["data"]["exams"]) >= 1 and all(e["marksEntered"] > 0 for e in r["data"]["exams"]),
+      r.get("data", r))
+s, r = call("GET", f"/admin/teachers/{T1_ID}/profile", None, T2)
+check("teacher blocked from admin teacher-profile route (403)", s == 403, r)
+
 # ---- 7. Access control spot checks ------------------------------------------
 s, r = call("GET", "/admin/analytics", None, T1)
 check("teacher blocked from admin analytics", s == 403, r)

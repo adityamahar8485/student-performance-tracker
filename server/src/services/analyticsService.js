@@ -202,3 +202,122 @@ export const getAnalytics = async () => {
     totals: { subjects, teachers, students, exams, marks },
   };
 };
+
+import mongoose from 'mongoose';
+import Enrollment from '../models/Enrollment.js';
+import ApiError from '../utils/ApiError.js';
+const toOid = (id) => new mongoose.Types.ObjectId(id);
+
+// ---------------------------------------------------------------------------
+// Teacher profile (admin view) — everything scoped to the subjects the
+// teacher owns, all via aggregation. Grades/pass rule recomputed in-pipeline
+// exactly as in the institution-wide analytics.
+// ---------------------------------------------------------------------------
+export const buildTeacherProfile = async (teacherId) => {
+  const teacher = await User.findOne({ _id: teacherId, role: 'teacher' }).select(
+    'name email isActive'
+  );
+  if (!teacher) throw new ApiError(404, 'Teacher not found');
+
+  const subjects = await Subject.find({ teacher: teacherId }).lean();
+  const subjectIds = subjects.map((s) => s._id);
+
+  const [enrolled, avgRows, passFailRows, exams, marksPerExam, marksTotal] =
+    await Promise.all([
+      subjectIds.length
+        ? Enrollment.aggregate([
+            { $match: { subject: { $in: subjectIds } } },
+            { $group: { _id: '$subject', studentCount: { $sum: 1 } } },
+          ])
+        : [],
+      subjectIds.length
+        ? Mark.aggregate([
+            joinExam,
+            { $unwind: '$examDoc' },
+            { $match: { 'examDoc.subject': { $in: subjectIds } } },
+            {
+              $group: {
+                _id: '$examDoc.subject',
+                totalScore: { $sum: '$score' },
+                totalMax: { $sum: '$examDoc.maxMarks' },
+                entries: { $sum: 1 },
+              },
+            },
+            {
+              $project: {
+                entries: 1,
+                totalScore: 1,
+                totalMax: 1,
+                avgPercentage: {
+                  $round: [{ $multiply: [{ $divide: ['$totalScore', '$totalMax'] }, 100] }, 2],
+                },
+              },
+            },
+          ])
+        : [],
+      subjectIds.length
+        ? Mark.aggregate([
+            joinExam,
+            { $unwind: '$examDoc' },
+            { $match: { 'examDoc.subject': { $in: subjectIds } } },
+            {
+              $group: {
+                _id: '$examDoc.subject',
+                passCount: {
+                  $sum: { $cond: [{ $gte: ['$score', { $multiply: ['$examDoc.maxMarks', 0.4] }] }, 1, 0] },
+                },
+                failCount: {
+                  $sum: { $cond: [{ $lt: ['$score', { $multiply: ['$examDoc.maxMarks', 0.4] }] }, 1, 0] },
+                },
+              },
+            },
+          ])
+        : [],
+      Exam.find({ subject: { $in: subjectIds } }).sort({ date: -1 }).lean(),
+      Mark.aggregate([
+        { $group: { _id: '$exam', marksEntered: { $sum: 1 } } },
+      ]),
+      Mark.countDocuments(),
+    ]);
+
+  const enrolledMap = new Map(enrolled.map((e) => [String(e._id), e.studentCount]));
+  const avgMap = new Map(avgRows.map((a) => [String(a._id), a]));
+  const pfMap = new Map(passFailRows.map((p) => [String(p._id), p]));
+  const marksMap = new Map(marksPerExam.map((m) => [String(m._id), m.marksEntered]));
+  const subjectById = new Map(subjects.map((s) => [String(s._id), s]));
+  const examCountBySubject = new Map();
+  for (const e of exams) {
+    const k = String(e.subject);
+    examCountBySubject.set(k, (examCountBySubject.get(k) ?? 0) + 1);
+  }
+
+  const subjectCards = subjects.map((s) => {
+    const a = avgMap.get(String(s._id));
+    const p = pfMap.get(String(s._id));
+    return {
+      subject: { id: s._id, name: s.name, code: s.code, totalMarks: s.totalMarks },
+      studentCount: enrolledMap.get(String(s._id)) ?? 0,
+      examCount: examCountBySubject.get(String(s._id)) ?? 0,
+      entries: a?.entries ?? 0,
+      avgPercentage: a?.avgPercentage ?? null,
+      passCount: p?.passCount ?? 0,
+      failCount: p?.failCount ?? 0,
+    };
+  });
+
+  return {
+    teacher: { id: teacher._id, name: teacher.name, email: teacher.email, isActive: teacher.isActive },
+    subjects: subjectCards,
+    exams: exams.map((e) => ({
+      id: e._id,
+      name: e.name,
+      subject: subjectById.get(String(e.subject)) ?? null,
+      date: e.date,
+      maxMarks: e.maxMarks,
+      isLocked: e.isLocked,
+      lockRequested: e.lockRequested,
+      marksEntered: marksMap.get(String(e._id)) ?? 0,
+    })),
+    totals: { subjects: subjects.length, exams: exams.length, marks: marksTotal },
+  };
+};

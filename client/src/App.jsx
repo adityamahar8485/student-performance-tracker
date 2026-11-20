@@ -8,6 +8,7 @@ import AdminSubjects from './pages/admin/AdminSubjects.jsx'
 import AdminTeachers from './pages/admin/AdminTeachers.jsx'
 import AdminStudents from './pages/admin/AdminStudents.jsx'
 import AdminExams from './pages/admin/AdminExams.jsx'
+import TeacherProfile from './pages/admin/TeacherProfile.jsx'
 
 import TeacherSubjects from './pages/teacher/TeacherSubjects.jsx'
 import TeacherExams from './pages/teacher/TeacherExams.jsx'
@@ -30,6 +31,7 @@ export default function App() {
           <Route index element={<AdminBoard />} />
           <Route path="subjects" element={<AdminSubjects />} />
           <Route path="teachers" element={<AdminTeachers />} />
+          <Route path="teachers/:id" element={<TeacherProfile />} />
           <Route path="students" element={<AdminStudents />} />
           <Route path="students/:id" element={<StudentProfile role="admin" />} />
           <Route path="exams" element={<AdminExams />} />

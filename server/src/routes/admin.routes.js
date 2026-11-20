@@ -7,6 +7,7 @@ import {
   createStudent,
   listStudents,
   studentPerformance,
+  teacherProfile,
   listExams,
   lockExam,
   analytics,
@@ -21,6 +22,7 @@ router.get('/subjects', listSubjects);
 // Teachers (registration + assignment)
 router.post('/teachers', createTeacher);
 router.get('/teachers', listTeachers);
+router.get('/teachers/:id/profile', teacherProfile);
 
 // Students (registration + enrollment)
 router.post('/students', createStudent);

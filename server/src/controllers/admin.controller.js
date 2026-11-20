@@ -7,6 +7,7 @@ import asyncHandler from '../utils/asyncHandler.js';
 import ApiError from '../utils/ApiError.js';
 import { getAnalytics } from '../services/analyticsService.js';
 import { buildStudentProfile } from '../services/studentService.js';
+import { buildTeacherProfile } from '../services/analyticsService.js';
 
 // Reject malformed ids with a 400 naming the value, before Mongoose CastError
 // turns them into a misleading 404
@@ -181,6 +182,13 @@ export const lockExam = asyncHandler(async (req, res) => {
     success: true,
     data: { id: exam._id, name: exam.name, isLocked: exam.isLocked, lockedAt: exam.lockedAt },
   });
+});
+
+// GET /api/admin/teachers/:id/profile — subjects held, their performance,
+// and the teacher's full exam register with marks-entered counts
+export const teacherProfile = asyncHandler(async (req, res) => {
+  const data = await buildTeacherProfile(req.params.id);
+  res.json({ success: true, data });
 });
 
 // GET /api/admin/students/:id/performance — any student's full profile
