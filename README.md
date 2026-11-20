@@ -6,11 +6,19 @@ Built for the Data Tech Alpha full-stack internship assignment (#3).
 
 ## Screenshots
 
-| Admin board (analytics + lock requests) | Teacher marks entry | Student performance & trend |
-|---|---|---|
-| ![Admin board](docs/screenshots/admin-board.png) | ![Teacher marks](docs/screenshots/teacher-marks.png) | ![Student trend](docs/screenshots/student-trend.png) |
+**Admin — the board**: analytics notices (needs-attention pinned red), the pending lock request, top performers, institution trend sheet, and the pass/fail register.
 
-More: [student performance page](docs/screenshots/student-performance.png) · [admin on mobile](docs/screenshots/admin-mobile.png) · [tables on mobile](docs/screenshots/tables-mobile.png)
+![Admin board](docs/screenshots/admin-board.png)
+
+| Teacher — marks entry | Student — score trend |
+|---|---|
+| ![Teacher marks entry](docs/screenshots/teacher-marks.png) | ![Student score trend](docs/screenshots/student-trend.png) |
+
+| Student — performance & rank | Admin — mobile |
+|---|---|
+| ![Student performance](docs/screenshots/student-performance.png) | ![Admin on mobile](docs/screenshots/admin-mobile.png) |
+
+More: [data tables on mobile](docs/screenshots/tables-mobile.png)
 
 ## Tech stack
 
