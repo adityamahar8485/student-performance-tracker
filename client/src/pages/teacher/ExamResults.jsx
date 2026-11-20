@@ -110,7 +110,7 @@ export default function ExamResults() {
                 <tbody>
                   {rows.map((r) => (
                     <tr key={r.student._id}>
-                      <td className="font-semibold">{r.student.name}
+                      <td className="font-semibold"><Link className="hover:underline" to={`/teacher/students/${r.student._id}`}>{r.student.name}</Link>
                         <span className="block text-xs font-normal text-ink-soft">{r.student.email}</span></td>
                       <td className="font-bold">{r.score ?? '-'}<span className="font-normal text-ink-soft"> / {results.data.exam.maxMarks}</span></td>
                       <td>{r.percentage !== null && r.percentage !== undefined ? r.percentage.toFixed(2) : '-'}</td>

@@ -7,6 +7,7 @@ import {
   editMark,
   examResults,
   requestLock,
+  studentPerformance,
 } from '../controllers/teacher.controller.js';
 
 const router = Router();
@@ -23,5 +24,8 @@ router.patch('/exams/:id/request-lock', requestLock);
 
 // Marks
 router.patch('/marks/:id', editMark);
+
+// Student profiles (own-subject students only)
+router.get('/students/:id/performance', studentPerformance);
 
 export default router;

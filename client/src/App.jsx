@@ -17,6 +17,7 @@ import ExamResults from './pages/teacher/ExamResults.jsx'
 import StudentSubjects from './pages/student/StudentSubjects.jsx'
 import StudentPerformance from './pages/student/StudentPerformance.jsx'
 import StudentTrend from './pages/student/StudentTrend.jsx'
+import StudentProfile from './pages/shared/StudentProfile.jsx'
 
 export default function App() {
   return (
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="subjects" element={<AdminSubjects />} />
           <Route path="teachers" element={<AdminTeachers />} />
           <Route path="students" element={<AdminStudents />} />
+          <Route path="students/:id" element={<StudentProfile role="admin" />} />
           <Route path="exams" element={<AdminExams />} />
         </Route>
       </Route>
@@ -40,6 +42,7 @@ export default function App() {
           <Route path="exams" element={<TeacherExams />} />
           <Route path="exams/entry" element={<MarksEntry />} />
           <Route path="results" element={<ExamResults />} />
+          <Route path="students/:id" element={<StudentProfile role="teacher" />} />
         </Route>
       </Route>
 

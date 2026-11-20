@@ -5,6 +5,7 @@ import Enrollment from '../models/Enrollment.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import ApiError from '../utils/ApiError.js';
 import { bulkUpsertMarks } from '../services/marksService.js';
+import { buildStudentProfile } from '../services/studentService.js';
 
 // Guard: exam must exist, belong to a subject THIS teacher owns, and be unlocked
 const loadOwnUnlockedExam = async (examId, teacherId) => {
@@ -150,6 +151,22 @@ export const examResults = asyncHandler(async (req, res) => {
     .sort((a, b) => (b.score ?? -1) - (a.score ?? -1)); // display order only
 
   res.json({ success: true, data: { exam, results } });
+});
+
+// ---------------------------------------------------------------------------
+// GET /api/teacher/students/:id/performance — only for students sharing at
+// least one of THIS teacher's subjects (same ownership rule as every route)
+// ---------------------------------------------------------------------------
+export const studentPerformance = asyncHandler(async (req, res) => {
+  const mySubjects = await Subject.find({ teacher: req.user.id }).select('_id');
+  const shared = await Enrollment.exists({
+    student: req.params.id,
+    subject: { $in: mySubjects.map((s) => s._id) },
+  });
+  if (!shared) throw new ApiError(403, 'This student is not enrolled in any of your subjects');
+
+  const data = await buildStudentProfile(req.params.id);
+  res.json({ success: true, data });
 });
 
 // ---------------------------------------------------------------------------

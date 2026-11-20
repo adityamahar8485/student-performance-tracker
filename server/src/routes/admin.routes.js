@@ -6,6 +6,7 @@ import {
   listTeachers,
   createStudent,
   listStudents,
+  studentPerformance,
   listExams,
   lockExam,
   analytics,
@@ -24,6 +25,7 @@ router.get('/teachers', listTeachers);
 // Students (registration + enrollment)
 router.post('/students', createStudent);
 router.get('/students', listStudents);
+router.get('/students/:id/performance', studentPerformance);
 
 // Exams + lock flow
 router.get('/exams', listExams);

@@ -136,6 +136,8 @@ JSON everywhere: `{ success, data }` / `{ success, message }`; authenticated rou
 | `PATCH /api/teacher/marks/:id` | `{ score }` → corrected entry (403 when locked) |
 | `GET /api/teacher/exams/:id/results` | → marks table incl. unmarked students |
 | `PATCH /api/teacher/exams/:id/request-lock` | → `lockRequested` |
+| `GET /api/admin/students/:id/performance` | → any student's full profile (rank, per-subject marks) |
+| `GET /api/teacher/students/:id/performance` | → profile for students in the teacher's own subjects |
 | `GET /api/student/subjects` | → subject cards (totals, %, grade) |
 | `GET /api/student/performance` | → cumulative %, grade, **batch rank**, breakdown |
 | `GET /api/student/subjects/:id/trend` | → chronological trend (Recharts data) |

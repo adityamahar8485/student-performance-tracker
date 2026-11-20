@@ -147,6 +147,16 @@ check("lowest avg subject = PHY102 (needs attention)", d["lowestAvgSubject"]["su
 check("totals sane", d["totals"] == {"subjects": 2, "teachers": 2, "students": 4, "exams": 2, "marks": 6}, d["totals"])
 check("exam trend sheet has both exams chronological", [t["name"] for t in d.get("examTrend", [])] == ["Midterm", "Unit Test"], d.get("examTrend"))
 
+# ---- 6b. Admin/teacher visibility of student profiles ------------------------
+s, r = call("GET", f"/admin/students/{students['aarav@student.dev']}/performance", None, TA)
+check("admin sees Aarav's full profile (rank 1, 2 subjects, exam rows)",
+      r["data"]["rank"] == 1 and len(r["data"]["perSubject"]) == 2
+      and all(len(p["exams"]) > 0 for p in r["data"]["perSubject"]), r.get("data", r))
+s, r = call("GET", f"/teacher/students/{ISHA}/performance", None, T1)
+check("teacher blocked from non-shared student profile (403)", s == 403, r)
+s, r = call("GET", f"/teacher/students/{students['aarav@student.dev']}/performance", None, T1)
+check("teacher sees shared student's profile", s == 200 and r["data"]["student"]["name"] == "Aarav", r)
+
 # ---- 7. Access control spot checks ------------------------------------------
 s, r = call("GET", "/admin/analytics", None, T1)
 check("teacher blocked from admin analytics", s == 403, r)

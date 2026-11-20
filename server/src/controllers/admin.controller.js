@@ -6,6 +6,7 @@ import Exam from '../models/Exam.js';
 import asyncHandler from '../utils/asyncHandler.js';
 import ApiError from '../utils/ApiError.js';
 import { getAnalytics } from '../services/analyticsService.js';
+import { buildStudentProfile } from '../services/studentService.js';
 
 // Reject malformed ids with a 400 naming the value, before Mongoose CastError
 // turns them into a misleading 404
@@ -180,6 +181,12 @@ export const lockExam = asyncHandler(async (req, res) => {
     success: true,
     data: { id: exam._id, name: exam.name, isLocked: exam.isLocked, lockedAt: exam.lockedAt },
   });
+});
+
+// GET /api/admin/students/:id/performance — any student's full profile
+export const studentPerformance = asyncHandler(async (req, res) => {
+  const data = await buildStudentProfile(req.params.id);
+  res.json({ success: true, data });
 });
 
 // ---------------------------------------------------------------------------

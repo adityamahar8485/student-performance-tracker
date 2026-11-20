@@ -96,7 +96,7 @@ export default function AdminStudents() {
               <div className="cap mb-4">ENROLLMENT LEDGER · {students.data.length}</div>
               <div className="sheet-scroll">
               <table className="sheet-table">
-                <thead><tr><th>STUDENT</th><th>BATCH</th><th>ENROLLED</th></tr></thead>
+                <thead><tr><th>STUDENT</th><th>BATCH</th><th>ENROLLED</th><th>RECORD</th></tr></thead>
                 <tbody>
                   {students.data.map((s) => (
                     <tr key={s._id}>
@@ -109,6 +109,7 @@ export default function AdminStudents() {
                               <span key={i}>{sub.code}{i < s.subjects.length - 1 ? ', ' : ''}</span>
                             ))}
                       </td>
+                      <td className="text-left"><Link className="tlink" to={`/admin/students/${s._id}`}>View →</Link></td>
                     </tr>
                   ))}
                 </tbody>
