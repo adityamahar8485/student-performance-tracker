@@ -94,6 +94,8 @@ node tests/verify-hash.mjs   # proves the admin password is stored bcrypt-hashed
 
 The E2E suite walks the entire graded flow with hand-computed expected values: role setup → exam creation → bulk marks → corrections → lock request → admin lock → locked-edit rejection → analytics numbers → student rank/trend → access control.
 
+> **Before demoing:** the E2E suite replaces the demo dataset with its own fixtures — re-run `npm run seed:demo` to restore the demo accounts. Note the login rate limit (20 attempts / 15 min per visitor) applies while testing many accounts quickly.
+
 ## API reference
 
 All responses are JSON `{ "success": true, "data": … }` or `{ "success": false, "message": … }`. Authenticated routes take `Authorization: Bearer <token>`. Role middleware: every `/api/admin|teacher|student` route is gated to its role.
