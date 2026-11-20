@@ -116,7 +116,16 @@ export default function MarksEntry() {
               <table className="sheet-table">
                       <thead><tr><th>STUDENT</th><th>SCORE</th><th>%</th><th>GRADE</th><th>RESULT</th></tr></thead>
                       <tbody>
-                        {rows.map((r) => (
+                        {rows.map((r) => {
+                          // Live preview: an edited-but-unsaved score shows its
+                          // would-be percentage in gold; saved values stay server-computed
+                          const raw = scores[r.student._id]
+                          const edited = raw !== undefined && String(raw).trim() !== '' &&
+                            Number.isFinite(Number(raw)) && Number(raw) !== r.score
+                          const previewPct = edited
+                            ? (Number(raw) / results.data.exam.maxMarks) * 100
+                            : null
+                          return (
                           <tr key={r.student._id}>
                             <td className="font-semibold">{r.student.name}
                               <span className="block text-xs font-normal text-ink-soft">{r.student.email}</span></td>
@@ -132,11 +141,20 @@ export default function MarksEntry() {
                                 className="field num !w-24 !py-1.5 text-right"
                               />
                             </td>
-                            <td>{r.percentage !== null && r.percentage !== undefined ? r.percentage.toFixed(2) : '-'}</td>
+                            <td>
+                              {previewPct !== null ? (
+                                <span className="font-semibold text-pin-gold-text" title="Unsaved preview — calculated on save">
+                                  {previewPct.toFixed(2)} ·
+                                </span>
+                              ) : (
+                                r.percentage !== null && r.percentage !== undefined ? r.percentage.toFixed(2) : '-'
+                              )}
+                            </td>
                             <td className="text-left"><GradeBadge grade={r.grade} /></td>
                             <td className="text-left"><PassFail isPass={r.score === null || r.score === undefined ? null : r.isPass} /></td>
                           </tr>
-                        ))}
+                          )
+                        })}
                       </tbody>
                     </table>
             </div>
@@ -145,7 +163,7 @@ export default function MarksEntry() {
                         <button className="btn" onClick={save} disabled={busy}>
                           {busy ? 'Pinning…' : 'Save all marks'}
                         </button>
-                        <span className="text-[13px] text-ink-soft">Saving upserts - existing entries are corrected, new ones added. Blank fields are skipped, not cleared.</span>
+                        <span className="text-[13px] text-ink-soft">Saving upserts - existing entries are corrected, new ones added. Blank fields are skipped, not cleared. Gold percentages are unsaved previews; grades finalize on save.</span>
                       </div>
                     )}
                   </>
