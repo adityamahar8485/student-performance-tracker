@@ -99,12 +99,13 @@ export default function StudentProfile({ role }) {
                 <button
                   key={p.subject._id}
                   onClick={() => setSubjectId(p.subject._id)}
-                  className={`rounded-sm border px-3 py-1.5 text-left text-xs transition-colors ${
+                  aria-label={`${p.subject.code} — ${p.percentage?.toFixed(1)}%`}
+                  className={`flex items-baseline gap-2.5 rounded-sm border px-3 py-1.5 text-left text-xs transition-colors ${
                     chosen.subject._id === p.subject._id ? 'border-ink bg-ink text-paper' : 'border-paper-edge bg-paper hover:bg-paper-rule/60'
                   }`}
                 >
                   <span className="font-semibold">{p.subject.code}</span>
-                  <span className="num ml-2 opacity-75">{p.percentage?.toFixed(1)}%</span>
+                  <span className="num opacity-75">{p.percentage?.toFixed(1)}%</span>
                 </button>
               ))}
             </div>
