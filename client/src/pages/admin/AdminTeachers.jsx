@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import api from '../../lib/api.js'
 import useApi from '../../hooks/useApi.js'
 import Notice from '../../components/Notice.jsx'
@@ -100,6 +101,9 @@ export default function AdminTeachers() {
                 </tbody>
               </table>
             </div>
+            <Link to="/admin/students" className="tlink mt-4 inline-block border-t border-paper-rule pt-3">
+              Enroll students →
+            </Link>
             </Notice>
           )}
       </div>

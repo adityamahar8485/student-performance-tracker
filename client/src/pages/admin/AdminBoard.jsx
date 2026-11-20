@@ -72,6 +72,9 @@ export default function AdminBoard() {
                           NEEDS ATTENTION
                         </span>
                       )}
+                      <Link to="/admin/exams" className="tlink mt-3 inline-block border-t border-paper-rule pt-3">
+                        Exam register →
+                      </Link>
                     </StatNotice>
                   </div>
                 ))
@@ -111,6 +114,9 @@ export default function AdminBoard() {
                 <span className="num ml-auto text-lg font-bold">{t.cumulativePercentage.toFixed(2)}%</span>
               </div>
             ))}
+            <Link to="/admin/students" className="tlink mt-3 inline-block border-t border-paper-rule pt-3">
+              All students →
+            </Link>
           </Notice>
         </div>
       )}

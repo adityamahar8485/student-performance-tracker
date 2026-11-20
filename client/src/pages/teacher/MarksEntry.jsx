@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import api from '../../lib/api.js'
 import useApi from '../../hooks/useApi.js'
 import Notice from '../../components/Notice.jsx'
@@ -151,7 +151,12 @@ export default function MarksEntry() {
                   </>
                 )}
               {error && <p className="mt-3 text-sm font-medium text-pin-red-text">{error}</p>}
-              {ok && <p className="mt-3 text-sm font-medium text-pin-green-text">{ok}</p>}
+              {ok && (
+                <p className="mt-3 flex flex-wrap items-center gap-2 text-sm font-medium text-pin-green-text">
+                  {ok}
+                  <Link className="tlink" to={`/teacher/results?exam=${examId}`}>View results →</Link>
+                </p>
+              )}
             </Notice>
           )}
       </div>

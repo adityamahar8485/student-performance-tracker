@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import api from '../../lib/api.js'
 import useApi from '../../hooks/useApi.js'
 import StatNotice from '../../components/StatNotice.jsx'
@@ -39,6 +40,12 @@ export default function StudentSubjects() {
                         </span>
                       </span>
                     </div>
+                    <Link
+                      to={`/student/trend?subject=${row.subject._id}`}
+                      className="tlink mt-3 inline-block border-t border-paper-rule pt-3"
+                    >
+                      Score trend for {row.subject.code} →
+                    </Link>
                   </StatNotice>
                 </div>
               ))}

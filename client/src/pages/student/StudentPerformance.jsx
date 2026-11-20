@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import api from '../../lib/api.js'
 import useApi from '../../hooks/useApi.js'
 import Notice from '../../components/Notice.jsx'
@@ -88,7 +89,7 @@ export default function StudentPerformance() {
                     <div className="cap mb-4">PER-SUBJECT STANDINGS</div>
                     <div className="sheet-scroll">
               <table className="sheet-table">
-                      <thead><tr><th>SUBJECT</th><th>EXAMS</th><th>SCORED</th><th>AVAILABLE</th><th>%</th><th>GRADE</th></tr></thead>
+                      <thead><tr><th>SUBJECT</th><th>EXAMS</th><th>SCORED</th><th>AVAILABLE</th><th>%</th><th>GRADE</th><th>TREND</th></tr></thead>
                       <tbody>
                         {d.perSubject.map((p) => (
                           <tr key={p.subject._id}>
@@ -98,6 +99,9 @@ export default function StudentPerformance() {
                             <td>{p.totalMax}</td>
                             <td className="font-bold">{p.percentage === null ? '-' : `${p.percentage.toFixed(2)}%`}</td>
                             <td className="text-left"><GradeBadge grade={p.grade} /></td>
+                            <td className="text-left">
+                              <Link className="tlink" to={`/student/trend?subject=${p.subject._id}`}>Plot →</Link>
+                            </td>
                           </tr>
                         ))}
                       </tbody>

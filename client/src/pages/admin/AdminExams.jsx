@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import api from '../../lib/api.js'
 import useApi from '../../hooks/useApi.js'
 import Notice from '../../components/Notice.jsx'
@@ -66,6 +67,9 @@ export default function AdminExams() {
                 </tbody>
               </table>
             </div>
+            <Link to="/admin" className="tlink mt-4 inline-block border-t border-paper-rule pt-3">
+              Board analytics →
+            </Link>
               {error && <p className="mt-3 text-sm font-medium text-pin-red-text">{error}</p>}
               <p className="mt-3 text-[13px] text-ink-soft">Locked exams reject every marks write - teachers see entry and editing disabled.</p>
             </Notice>

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import api from '../../lib/api.js'
 import useApi from '../../hooks/useApi.js'
 import Notice from '../../components/Notice.jsx'
@@ -91,7 +92,7 @@ export default function TeacherExams() {
             <Notice pin="gold" tilt={0.4} settleKey={exams.data.map((e) => `${e._id}${e.isLocked}${e.lockRequested}`).join()}>
               <div className="cap mb-4">MY EXAMS · {exams.data.length}</div>
               <table className="sheet-table">
-                <thead><tr><th>EXAM</th><th>DATE</th><th>MAX</th><th>STATUS</th><th>LOCK</th></tr></thead>
+                <thead><tr><th>EXAM</th><th>DATE</th><th>MAX</th><th>STATUS</th><th>LOCK</th><th>MARKS / RESULTS</th></tr></thead>
                 <tbody>
                   {exams.data.map((e) => (
                     <tr key={e._id}>
@@ -111,6 +112,10 @@ export default function TeacherExams() {
                           : <button className="btn btn-ghost !px-3 !py-1 text-xs" disabled={requesting === e._id} onClick={() => requestLock(e)}>
                               {requesting === e._id ? '…' : 'Request lock'}
                             </button>}
+                      </td>
+                      <td className="text-left whitespace-nowrap">
+                        {!e.isLocked && <Link className="tlink mr-3" to={`/teacher/exams/entry?exam=${e._id}`}>Enter marks</Link>}
+                        <Link className="tlink" to={`/teacher/results?exam=${e._id}`}>Results</Link>
                       </td>
                     </tr>
                   ))}

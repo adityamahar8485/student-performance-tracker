@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import api from '../../lib/api.js'
 import useApi from '../../hooks/useApi.js'
 import Notice from '../../components/Notice.jsx'
@@ -37,8 +38,12 @@ export default function TeacherSubjects() {
                       {examsFor.length > 0 && (
                         <ul className="mt-3 space-y-1.5 border-t border-paper-rule pt-3">
                           {examsFor.slice(0, 3).map((e) => (
-                            <li key={e._id} className="num flex justify-between text-[13px]">
-                              <span>{e.name} · {fmtDate(e.date)}</span>
+                            <li key={e._id} className="num flex justify-between gap-2 text-[13px]">
+                              <span>
+                                {e.name} · {fmtDate(e.date)}{' '}
+                                <Link className="tlink" to={`/teacher/results?exam=${e._id}`}>results</Link>
+                                {!e.isLocked && <> · <Link className="tlink" to={`/teacher/exams/entry?exam=${e._id}`}>marks</Link></>}
+                              </span>
                               <span className={e.isLocked ? 'font-semibold text-pin-red-text' : e.lockRequested ? 'font-semibold text-pin-gold-text' : 'text-ink-soft'}>
                                 {e.isLocked ? 'LOCKED' : e.lockRequested ? 'LOCK REQ.' : 'open'}
                               </span>

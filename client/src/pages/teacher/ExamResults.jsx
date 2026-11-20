@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import api from '../../lib/api.js'
 import useApi from '../../hooks/useApi.js'
 import Notice from '../../components/Notice.jsx'
@@ -91,6 +91,10 @@ export default function ExamResults() {
               <p className="num mb-4 text-[13px] text-ink-soft">
                 {marked.length} marked · {avg !== null ? `mean of entries ${avg}%` : 'no marks yet'}
                 {results.data.exam.isLocked ? ' · locked, final' : ''}
+                {' · '}
+                {!results.data.exam.isLocked && (
+                  <Link className="tlink" to={`/teacher/exams/entry?exam=${examId}`}>Correct marks →</Link>
+                )}
               </p>
               <div className="sheet-scroll">
               <table className="sheet-table">

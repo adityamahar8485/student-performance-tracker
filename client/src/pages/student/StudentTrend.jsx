@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import {
   ResponsiveContainer, LineChart, Line, XAxis, YAxis,
   CartesianGrid, Tooltip, ReferenceLine,
@@ -18,10 +19,17 @@ const tooltipStyle = {
 
 export default function StudentTrend() {
   const subjects = useApi(fetchSubjects, [])
-  const [subjectId, setSubjectId] = useState('')
+  const [searchParams, setSearchParams] = useSearchParams()
   const [refresh, setRefresh] = useState(0)
 
-  const chosen = subjectId || (subjects.data ?? [])[0]?.subject?._id || ''
+  // Selection lives in the URL (?subject=) so deep links and browser
+  // back/forward work from the subject cards and performance standings
+  const paramSubject = searchParams.get('subject') ?? ''
+  const chosen = paramSubject || (subjects.data ?? [])[0]?.subject?._id || ''
+  const selectSubject = (id) => {
+    setSearchParams(id ? { subject: id } : {})
+    setRefresh((n) => n + 1)
+  }
   const fetchTrend = () => chosen
     ? api.get(`/api/student/subjects/${chosen}/trend`).then((r) => r.data.data)
     : Promise.resolve(null)
@@ -48,7 +56,7 @@ export default function StudentTrend() {
             {(subjects.data ?? []).map((row) => (
               <li key={row.subject._id}>
                 <button
-                  onClick={() => { setSubjectId(row.subject._id); setRefresh((n) => n + 1) }}
+                  onClick={() => selectSubject(row.subject._id)}
                   className={`w-full rounded-sm border px-3 py-2.5 text-left text-sm transition-colors ${
                     chosen === row.subject._id ? 'border-ink bg-ink text-paper' : 'border-paper-edge bg-paper hover:bg-paper-rule/60'
                   }`}

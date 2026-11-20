@@ -126,6 +126,15 @@ input, select, textarea { caret-color: var(--color-ink); }
 /* Wide data tables scroll inside their notice instead of breaking the page */
 .sheet-scroll { overflow-x: auto; }
 
+/* Contextual cross-navigation link (blue = action, like the blue pin) */
+.tlink {
+  color: var(--color-pin-blue);
+  font-weight: 600;
+  font-size: 13px;
+  text-decoration: none;
+}
+.tlink:hover { text-decoration: underline; text-underline-offset: 3px; }
+
 /* Data tables: ruled paper rows, right-aligned quantities */
 .sheet-table { @apply w-full border-collapse text-sm; }
 .sheet-table th {
