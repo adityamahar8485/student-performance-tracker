@@ -1,0 +1,150 @@
+@import "tailwindcss";
+
+/* ─── Department Notice Board - design tokens ─────────────────────────────── */
+@theme {
+  --color-cork: #a58a6b;
+  --color-wood: #4a3826;
+  --color-wood-edge: #2e2114;
+  --color-wood-text: #d8c9a8;
+  --color-paper: #fdfcf8;
+  --color-paper-rule: #eee6d4;
+  --color-paper-edge: #e8dfcc;
+  --color-ink: #26221c;
+  --color-ink-deep: #1a1611;
+  --color-ink-soft: #6d6152;
+  --color-pin-red: #b3452e;
+  --color-pin-red-text: #9c3823;
+  --color-pin-green: #3e7a4e;
+  --color-pin-green-text: #2f6340;
+  --color-pin-blue: #2b5aa0;
+  --color-pin-gold: #b3862c;
+  --color-pin-gold-text: #7d5a10;
+  --font-display: "Oswald", "Arial Narrow", sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+}
+
+/* ─── Ground ──────────────────────────────────────────────────────────────── */
+body {
+  @apply bg-cork text-ink font-body antialiased;
+  background-image:
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.045) 0 2px, transparent 2px 9px),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 7px),
+    radial-gradient(ellipse at 50% -10%, rgba(255, 244, 220, 0.16), transparent 55%),
+    radial-gradient(ellipse at 50% 115%, rgba(20, 12, 4, 0.22), transparent 60%);
+  background-attachment: fixed;
+}
+
+/* ─── Browser surfaces ────────────────────────────────────────────────────── */
+::selection { background: var(--color-ink); color: var(--color-paper); }
+:focus-visible { outline: 2px solid var(--color-ink); outline-offset: 2px; }
+* { scrollbar-width: thin; scrollbar-color: #7c6647 #b49a7c; }
+*::-webkit-scrollbar { width: 10px; height: 10px; }
+*::-webkit-scrollbar-thumb { background: #7c6647; border-radius: 6px; border: 2px solid #b49a7c; }
+*::-webkit-scrollbar-track { background: #b49a7c; }
+input, select, textarea { caret-color: var(--color-ink); }
+
+/* ─── Primitives ──────────────────────────────────────────────────────────── */
+.num { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+
+.cap {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.22em;
+  color: var(--color-ink-soft);
+}
+
+/* Pinned notice: paper card, pushpin, hand-hung tilt, settle motion.
+   --tilt sets the resting rotation; content is visible from frame one. */
+.notice {
+  position: relative;
+  background: var(--color-paper);
+  border-top: 1px solid var(--color-paper-edge);
+  box-shadow: 0 10px 18px rgba(30, 20, 8, 0.35);
+  transform: rotate(calc(var(--tilt, 0) * 1deg));
+  animation: notice-settle 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes notice-settle {
+  0%   { transform: rotate(calc(var(--tilt, 0) * 1deg + 1.2deg)) translateY(-7px); }
+  62%  { transform: rotate(calc(var(--tilt, 0) * 1deg - 0.35deg)) translateY(1px); }
+  100% { transform: rotate(calc(var(--tilt, 0) * 1deg)) translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .notice { animation: none; }
+}
+
+.pin {
+  position: absolute;
+  top: -9px;
+  left: 50%;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  box-shadow: 0 3px 4px rgba(0, 0, 0, 0.4), inset -3px -3px 5px rgba(0, 0, 0, 0.35);
+}
+
+/* Clipped label-tag navigation (reads as tabs) */
+.tag {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  background: var(--color-paper);
+  color: var(--color-wood);
+  padding: 7px 14px 5px;
+  clip-path: polygon(0 0, 100% 0, 100% 70%, 50% 100%, 0 70%);
+  transition: background 120ms ease-out;
+}
+.tag:hover { background: #f1ead9; }
+.tag.on { background: var(--color-ink); color: var(--color-paper); }
+
+/* Standard controls in the board's voice */
+.btn {
+  @apply inline-flex items-center justify-center gap-2 rounded-sm px-4 py-2 text-sm font-semibold text-paper;
+  background: var(--color-ink);
+  transition: background 120ms ease-out, transform 80ms ease-out;
+}
+.btn:hover { background: var(--color-ink-deep); }
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-ghost {
+  @apply text-ink;
+  background: transparent;
+  border: 2px solid var(--color-ink);
+}
+.btn-ghost:hover { background: rgba(38, 34, 28, 0.07); }
+.btn-danger { background: var(--color-pin-red-text); }
+.btn-danger:hover { background: #832b1a; }
+
+.field {
+  @apply w-full rounded-sm border bg-paper px-3 py-2 text-sm text-ink;
+  border-color: rgba(38, 34, 28, 0.25);
+}
+.field:focus { border-color: var(--color-ink); outline: 2px solid var(--color-ink); outline-offset: 1px; }
+.field:disabled { background: var(--color-paper-rule); cursor: not-allowed; }
+
+/* Wide data tables scroll inside their notice instead of breaking the page */
+.sheet-scroll { overflow-x: auto; }
+
+/* Data tables: ruled paper rows, right-aligned quantities */
+.sheet-table { @apply w-full border-collapse text-sm; }
+.sheet-table th {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  color: var(--color-ink-soft);
+  text-align: right;
+  padding: 8px 10px;
+  border-bottom: 2px solid var(--color-ink);
+}
+.sheet-table th:first-child, .sheet-table td:first-child { text-align: left; padding-left: 0; }
+.sheet-table td {
+  padding: 10px;
+  text-align: right;
+  border-bottom: 1px solid var(--color-paper-rule);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+.sheet-table tbody tr:hover td { background: #f7f3e9; }
+.sheet-table tfoot td { border-top: 3px double var(--color-ink); border-bottom: none; font-weight: 700; }
